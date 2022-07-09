@@ -36,8 +36,7 @@ func NewSlackBot(parentLogger logger.Logger, token string, channelName string) *
 	}
 }
 
-func (sb *SlackBot) Start() error {
-	ctx := context.Background()
+func (sb *SlackBot) Start(ctx context.Context) error {
 	sb.log.Info("Starting bot")
 	api := slack.New(sb.Token)
 	authResp, err := api.AuthTest()

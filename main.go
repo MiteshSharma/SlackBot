@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net"
 	"os"
 	"os/signal"
@@ -19,9 +20,12 @@ func main() {
 	if err != nil {
 		panic("error")
 	}
+	ctx := context.Background()
+	ctx, cancelCtxFn := context.WithCancel(ctx)
+	defer cancelCtxFn()
 
 	slackBot := bot.NewSlackBot(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
-	slackBot.Start()
+	slackBot.Start(ctx)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
