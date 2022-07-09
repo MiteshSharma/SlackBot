@@ -1,0 +1,6 @@
+[logger]
+file=""
+
+[slack]
+token=""
+channelName=""
