@@ -9,6 +9,7 @@ import (
 	bot "github.com/MiteshSharma/SlackBot/bot"
 	"github.com/MiteshSharma/SlackBot/config"
 	"github.com/MiteshSharma/SlackBot/logger"
+	"github.com/MiteshSharma/SlackBot/notify"
 )
 
 func main() {
@@ -23,6 +24,13 @@ func main() {
 	ctx := context.Background()
 	ctx, cancelCtxFn := context.WithCancel(ctx)
 	defer cancelCtxFn()
+
+	sn := notify.NewSlackNotifier(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
+	sn.SendEvent(ctx, notify.Event{
+		Title:   "Hello",
+		Message: "welcome to slack message",
+		Channel: "test-channel",
+	})
 
 	slackBot := bot.NewSlackBot(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
 	slackBot.Start(ctx)
