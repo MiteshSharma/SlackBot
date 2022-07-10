@@ -6,7 +6,8 @@ import (
 	"os"
 	"os/signal"
 
-	bot "github.com/MiteshSharma/SlackBot/bot"
+	"github.com/MiteshSharma/SlackBot/bot"
+	"github.com/MiteshSharma/SlackBot/cmd/server"
 	"github.com/MiteshSharma/SlackBot/config"
 	"github.com/MiteshSharma/SlackBot/logger"
 	"github.com/MiteshSharma/SlackBot/notify"
@@ -15,6 +16,9 @@ import (
 func main() {
 	config := config.GetConfig()
 	logger := logger.NewLogger(config.LoggerConfig)
+
+	s := server.NewServer(logger, config)
+	s.StartServer()
 
 	err := sendSystemdNotification()
 
@@ -38,6 +42,8 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
+
+	s.StopServer(ctx)
 
 	os.Exit(0)
 }

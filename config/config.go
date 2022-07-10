@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -10,6 +11,7 @@ import (
 type Config struct {
 	LoggerConfig LoggerConfig `mapstructure:"logger"`
 	SlackConfig  SlackConfig  `mapstructure:"slack"`
+	ServerConfig ServerConfig `mapstructure:"server"`
 }
 
 // LoggerConfig has logger related configuration.
@@ -20,6 +22,12 @@ type LoggerConfig struct {
 type SlackConfig struct {
 	Token       string `mapstructure:"token"`
 	ChannelName string `mapstructure:"channelName"`
+}
+
+type ServerConfig struct {
+	Port         string        `mapstructure:"port"`
+	ReadTimeout  time.Duration `mapstructure:"readTimeout"`
+	WriteTimeout time.Duration `mapstructure:"writeTimeout"`
 }
 
 func GetConfig() *Config {
