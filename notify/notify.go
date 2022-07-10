@@ -5,9 +5,9 @@ import (
 )
 
 type Event struct {
-	Title   string
-	Message string
-	Channel string
+	Message      string
+	Channel      string
+	IsAttachment bool
 }
 
 type Notifier interface {

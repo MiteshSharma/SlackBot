@@ -27,9 +27,9 @@ func main() {
 
 	sn := notify.NewSlackNotifier(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
 	sn.SendEvent(ctx, notify.Event{
-		Title:   "Hello",
-		Message: "welcome to slack message",
-		Channel: "test-channel",
+		Message:      "welcome to slack message",
+		Channel:      "test-channel",
+		IsAttachment: false,
 	})
 
 	slackBot := bot.NewSlackBot(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)

@@ -25,26 +25,43 @@ func NewSlackNotifier(log logger.Logger, token string, channel string) *SlackNot
 
 // SendEvent sends event notification to slack
 func (s *SlackNotifier) SendEvent(ctx context.Context, event Event) error {
-	s.log.Debug(fmt.Sprint("Sending message to slack with title: %w", event.Title))
-	attachment := getSlackMessage(event)
+	s.log.Debug("Sending message to slack")
 
 	targetChannel := event.Channel
 	if targetChannel == "" {
 		targetChannel = s.channel
 	}
 
-	channelID, timestamp, err := s.client.PostMessage(targetChannel, slack.MsgOptionAttachments(attachment), slack.MsgOptionAsUser(true))
+	var err error
+	if event.IsAttachment {
+		err = s.sendAttachmentMessage(ctx, event, targetChannel)
+	} else {
+		err = s.sendMessage(ctx, event, targetChannel)
+	}
+
+	return err
+}
+
+func (s *SlackNotifier) sendAttachmentMessage(ctx context.Context, event Event, targetChannel string) error {
+	attachment := getSlackMessage(event)
+	_, timestamp, err := s.client.PostMessage(targetChannel, slack.MsgOptionAttachments(attachment), slack.MsgOptionAsUser(true))
 	if err != nil {
 		return fmt.Errorf("error while posting message to channel %q with error %w at %q", targetChannel, err, timestamp)
 	}
-	s.log.Debug(fmt.Sprint("Event successfully sent to channel %w", channelID))
+	return nil
+}
+
+func (s *SlackNotifier) sendMessage(ctx context.Context, event Event, targetChannel string) error {
+	_, timestamp, err := s.client.PostMessage(targetChannel, slack.MsgOptionText(event.Message, false), slack.MsgOptionAsUser(true))
+	if err != nil {
+		return fmt.Errorf("error while posting message to channel %q with error %w at %q", targetChannel, err, timestamp)
+	}
 	return nil
 }
 
 // Format slack message in proper attachment format
 func getSlackMessage(event Event) slack.Attachment {
 	return slack.Attachment{
-		Pretext: fmt.Sprintf("*%s*", event.Title),
 		Fields: []slack.AttachmentField{
 			{
 
