@@ -4,6 +4,7 @@ file=""
 [slack]
 token=""
 channelName=""
+signingSecret=""
 
 [server]
 port="3002"

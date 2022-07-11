@@ -17,6 +17,7 @@ func (a *ServerAPI) setupRoutes() {
 	a.Router.Metrics = a.Router.APIRoot.PathPrefix("/metrics").Subrouter()
 
 	a.InitHealthCheck()
+	a.InitSlackWebhook()
 
 	a.Metrics.SetupHttpHandler(a.Router.Metrics)
 }

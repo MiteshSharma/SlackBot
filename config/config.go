@@ -20,8 +20,9 @@ type LoggerConfig struct {
 }
 
 type SlackConfig struct {
-	Token       string `mapstructure:"token"`
-	ChannelName string `mapstructure:"channelName"`
+	Token         string `mapstructure:"token"`
+	ChannelName   string `mapstructure:"channelName"`
+	SigningSecret string `mapstructure:"signingSecret"`
 }
 
 type ServerConfig struct {

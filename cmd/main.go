@@ -17,9 +17,6 @@ func main() {
 	config := config.GetConfig()
 	logger := logger.NewLogger(config.LoggerConfig)
 
-	s := server.NewServer(logger, config)
-	s.StartServer()
-
 	err := sendSystemdNotification()
 
 	if err != nil {
@@ -30,14 +27,12 @@ func main() {
 	defer cancelCtxFn()
 
 	sn := notify.NewSlackNotifier(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
-	sn.SendEvent(ctx, notify.Event{
-		Message:      "welcome to slack message",
-		Channel:      "test-channel",
-		IsAttachment: false,
-	})
 
 	slackBot := bot.NewSlackBot(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
 	slackBot.Start(ctx)
+
+	s := server.NewServer(ctx, logger, config, sn)
+	s.StartServer()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

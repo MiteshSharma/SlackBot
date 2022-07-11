@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/MiteshSharma/SlackBot/config"
+	"github.com/MiteshSharma/SlackBot/notify"
 
 	"github.com/urfave/negroni"
 
@@ -23,13 +24,13 @@ type Server struct {
 	ServerAPI   *api.ServerAPI
 }
 
-func NewServer(logger logger.Logger, config *config.Config) *Server {
+func NewServer(appContext context.Context, logger logger.Logger, config *config.Config, notify notify.Notifier) *Server {
 	metrics := metrics.NewMetrics()
 	router := mux.NewRouter()
 
 	serverParam := api.NewServerParam(logger, metrics, config)
 
-	serverApi := api.NewServerAPI(router, serverParam)
+	serverApi := api.NewServerAPI(appContext, router, serverParam, notify)
 
 	server := &Server{
 		Router:      router,
