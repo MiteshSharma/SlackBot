@@ -9,9 +9,10 @@ import (
 )
 
 type Config struct {
-	LoggerConfig LoggerConfig `mapstructure:"logger"`
-	SlackConfig  SlackConfig  `mapstructure:"slack"`
-	ServerConfig ServerConfig `mapstructure:"server"`
+	LoggerConfig   LoggerConfig   `mapstructure:"logger"`
+	SlackConfig    SlackConfig    `mapstructure:"slack"`
+	ServerConfig   ServerConfig   `mapstructure:"server"`
+	DatabaseConfig DatabaseConfig `mapstructure:"database"`
 }
 
 // LoggerConfig has logger related configuration.
@@ -23,12 +24,24 @@ type SlackConfig struct {
 	Token         string `mapstructure:"token"`
 	ChannelName   string `mapstructure:"channelName"`
 	SigningSecret string `mapstructure:"signingSecret"`
+	ClientID      string `mapstructure:"clientId"`
+	ClientSecret  string `mapstructure:"clientSecret"`
 }
 
 type ServerConfig struct {
 	Port         string        `mapstructure:"port"`
 	ReadTimeout  time.Duration `mapstructure:"readTimeout"`
 	WriteTimeout time.Duration `mapstructure:"writeTimeout"`
+}
+
+// DatabaseConfig has database related configuration.
+type DatabaseConfig struct {
+	Type             string `mapstructure:"type"`
+	Host             string `mapstructure:"host"`
+	DbName           string `mapstructure:"dbName"`
+	UserName         string `mapstructure:"userName"`
+	Password         string `mapstructure:"password"`
+	ConnectionString string `mapstructure:"connectionString"`
 }
 
 func GetConfig() *Config {

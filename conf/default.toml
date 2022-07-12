@@ -5,8 +5,17 @@ file=""
 token=""
 channelName=""
 signingSecret=""
+clientId=""
+clientSecret=""
 
 [server]
 port="3002"
 readTimeout=5
 writeTimeout=5
+
+[database]
+type="postgres"
+host="127.0.0.1"
+dbName="slack_bot"
+userName="root"
+password="root"

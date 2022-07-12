@@ -15,6 +15,7 @@ import (
 	"github.com/MiteshSharma/SlackBot/metrics"
 	"github.com/MiteshSharma/SlackBot/pkg/api"
 	"github.com/MiteshSharma/SlackBot/pkg/model"
+	"github.com/MiteshSharma/SlackBot/pkg/repository"
 	"github.com/gorilla/mux"
 )
 
@@ -30,8 +31,9 @@ func NewServer(appContext context.Context, logger logger.Logger, config *config.
 	router := mux.NewRouter()
 
 	serverParam := model.NewServerParam(logger, metrics, config)
+	repository := repository.NewPersistentRepository(logger, config, metrics)
 
-	serverApi := api.NewServerAPI(appContext, router, serverParam, notify)
+	serverApi := api.NewServerAPI(appContext, router, repository, serverParam, notify)
 
 	server := &Server{
 		Router:      router,

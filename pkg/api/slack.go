@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -11,13 +10,51 @@ import (
 )
 
 func (a *ServerAPI) InitSlackWebhook() {
+	a.Router.APIRoot.Handle("/slack/oauth", http.HandlerFunc(a.OAuthWebhook))
 	a.Router.APIRoot.Handle("/slack", http.HandlerFunc(a.SlackWebhook))
+}
+
+// SlackWebhook func is used to handle slack event API callback
+func (a *ServerAPI) OAuthWebhook(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	oAuthErr, ok := getFormParam(r, "error")
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if oAuthErr != "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	code, ok := getFormParam(r, "code")
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	state, ok := getFormParam(r, "state")
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = a.App.HandleOauth(code, state)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
 }
 
 // SlackWebhook func is used to handle slack event API callback
 func (a *ServerAPI) SlackWebhook(w http.ResponseWriter, r *http.Request) {
 	signingSecret := a.Config.SlackConfig.SigningSecret
-	fmt.Println(signingSecret)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -60,4 +97,12 @@ func (a *ServerAPI) SlackWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func getFormParam(r *http.Request, key string) (string, bool) {
+	param, ok := r.Form[key]
+	if !ok || len(param) != 1 {
+		return "", false
+	}
+	return param[0], true
 }
