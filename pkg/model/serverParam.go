@@ -2,8 +2,8 @@ package model
 
 import (
 	"github.com/MiteshSharma/SlackBot/config"
-	"github.com/MiteshSharma/SlackBot/logger"
-	"github.com/MiteshSharma/SlackBot/metrics"
+	"github.com/MiteshSharma/SlackBot/core/logger"
+	"github.com/MiteshSharma/SlackBot/core/metrics"
 )
 
 type ServerParam struct {

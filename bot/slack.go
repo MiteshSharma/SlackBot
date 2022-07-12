@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/MiteshSharma/SlackBot/logger"
+	"github.com/MiteshSharma/SlackBot/core/logger"
 	"github.com/slack-go/slack"
 )
 

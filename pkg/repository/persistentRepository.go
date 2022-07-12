@@ -2,11 +2,11 @@ package repository
 
 import (
 	"github.com/MiteshSharma/SlackBot/config"
-	"github.com/MiteshSharma/SlackBot/metrics"
+	"github.com/MiteshSharma/SlackBot/core/metrics"
 	"github.com/MiteshSharma/SlackBot/pkg/repository/sqlRepository"
 
+	"github.com/MiteshSharma/SlackBot/core/logger"
 	"github.com/MiteshSharma/SlackBot/core/sql"
-	"github.com/MiteshSharma/SlackBot/logger"
 )
 
 type PersistentRepository struct {

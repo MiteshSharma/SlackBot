@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/MiteshSharma/SlackBot/config"
-	"github.com/MiteshSharma/SlackBot/logger"
+	"github.com/MiteshSharma/SlackBot/core/logger"
 	"github.com/jinzhu/gorm"
 
 	// This package is used as mysql driver with gorm

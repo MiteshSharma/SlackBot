@@ -8,7 +8,7 @@ import (
 
 	"github.com/MiteshSharma/SlackBot/cmd/server"
 	"github.com/MiteshSharma/SlackBot/config"
-	"github.com/MiteshSharma/SlackBot/logger"
+	"github.com/MiteshSharma/SlackBot/core/logger"
 	"github.com/MiteshSharma/SlackBot/notify"
 )
 

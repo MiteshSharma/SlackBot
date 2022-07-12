@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/MiteshSharma/SlackBot/logger"
+	"github.com/MiteshSharma/SlackBot/core/logger"
 	"github.com/slack-go/slack"
 )
 

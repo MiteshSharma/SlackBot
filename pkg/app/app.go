@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/MiteshSharma/SlackBot/config"
-	"github.com/MiteshSharma/SlackBot/logger"
-	"github.com/MiteshSharma/SlackBot/metrics"
+	"github.com/MiteshSharma/SlackBot/core/logger"
+	"github.com/MiteshSharma/SlackBot/core/metrics"
 	"github.com/MiteshSharma/SlackBot/notify"
 	"github.com/MiteshSharma/SlackBot/pkg/model"
 	"github.com/MiteshSharma/SlackBot/pkg/repository"

@@ -11,8 +11,8 @@ import (
 
 	"github.com/urfave/negroni"
 
-	"github.com/MiteshSharma/SlackBot/logger"
-	"github.com/MiteshSharma/SlackBot/metrics"
+	"github.com/MiteshSharma/SlackBot/core/logger"
+	"github.com/MiteshSharma/SlackBot/core/metrics"
 	"github.com/MiteshSharma/SlackBot/pkg/api"
 	"github.com/MiteshSharma/SlackBot/pkg/model"
 	"github.com/MiteshSharma/SlackBot/pkg/repository"
