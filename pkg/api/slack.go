@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
-	"github.com/MiteshSharma/SlackBot/notify"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
@@ -56,35 +54,10 @@ func (a *ServerAPI) SlackWebhook(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(r.Challenge))
 	}
 
-	if eventsAPIEvent.Type == slackevents.CallbackEvent {
-		innerEvent := eventsAPIEvent.InnerEvent
-		switch ev := innerEvent.Data.(type) {
-		case *slackevents.AppMentionEvent:
-			a.handleSlackMessage(*ev)
-		}
-	}
-}
-
-func (a *ServerAPI) handleSlackMessage(event slackevents.AppMentionEvent) error {
-	api := slack.New(a.Config.SlackConfig.Token)
-	authResp, err := api.AuthTest()
+	err = a.App.HandleSlackMessage(eventsAPIEvent)
 	if err != nil {
-		a.Log.Error(fmt.Sprint("auth request test failed with err: %w", err))
-		return fmt.Errorf("auth request test failed with err: %w", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-	botID := authResp.UserID
-	if !strings.HasPrefix(event.Text, "<@"+botID+">") {
-		a.Log.Debug(fmt.Sprint("Ignoring message as it doesn't contain %w prefix", botID))
-		return nil
-	}
-
-	message := strings.TrimPrefix(event.Text, "<@"+botID+">")
-
-	a.BotNotify.SendEvent(a.Context, notify.Event{
-		Message:      message,
-		Channel:      "test-channel",
-		IsAttachment: false,
-	})
-
-	return nil
+	w.WriteHeader(http.StatusOK)
 }

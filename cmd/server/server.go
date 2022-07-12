@@ -11,15 +11,16 @@ import (
 
 	"github.com/urfave/negroni"
 
-	"github.com/MiteshSharma/SlackBot/api"
 	"github.com/MiteshSharma/SlackBot/logger"
 	"github.com/MiteshSharma/SlackBot/metrics"
+	"github.com/MiteshSharma/SlackBot/pkg/api"
+	"github.com/MiteshSharma/SlackBot/pkg/model"
 	"github.com/gorilla/mux"
 )
 
 type Server struct {
 	Router      *mux.Router
-	ServerParam *api.ServerParam
+	ServerParam *model.ServerParam
 	httpServer  *http.Server
 	ServerAPI   *api.ServerAPI
 }
@@ -28,7 +29,7 @@ func NewServer(appContext context.Context, logger logger.Logger, config *config.
 	metrics := metrics.NewMetrics()
 	router := mux.NewRouter()
 
-	serverParam := api.NewServerParam(logger, metrics, config)
+	serverParam := model.NewServerParam(logger, metrics, config)
 
 	serverApi := api.NewServerAPI(appContext, router, serverParam, notify)
 

@@ -6,6 +6,8 @@ import (
 	"github.com/MiteshSharma/SlackBot/config"
 	"github.com/MiteshSharma/SlackBot/logger"
 	"github.com/MiteshSharma/SlackBot/notify"
+	"github.com/MiteshSharma/SlackBot/pkg/app"
+	"github.com/MiteshSharma/SlackBot/pkg/model"
 	"github.com/gorilla/mux"
 
 	"github.com/MiteshSharma/SlackBot/metrics"
@@ -19,9 +21,10 @@ type ServerAPI struct {
 	Log        logger.Logger
 	Router     *Router
 	BotNotify  notify.Notifier
+	App        *app.App
 }
 
-func NewServerAPI(appContext context.Context, router *mux.Router, serverParam *ServerParam, botNotify notify.Notifier) *ServerAPI {
+func NewServerAPI(appContext context.Context, router *mux.Router, serverParam *model.ServerParam, botNotify notify.Notifier) *ServerAPI {
 	api := &ServerAPI{
 		Context:    appContext,
 		MainRouter: router,
@@ -30,6 +33,7 @@ func NewServerAPI(appContext context.Context, router *mux.Router, serverParam *S
 		Log:        serverParam.Logger,
 		Router:     &Router{},
 		BotNotify:  botNotify,
+		App:        app.NewApp(appContext, serverParam, botNotify),
 	}
 	api.setupRoutes()
 	return api

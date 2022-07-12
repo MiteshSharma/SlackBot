@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/MiteshSharma/SlackBot/bot"
 	"github.com/MiteshSharma/SlackBot/cmd/server"
 	"github.com/MiteshSharma/SlackBot/config"
 	"github.com/MiteshSharma/SlackBot/logger"
@@ -28,8 +27,8 @@ func main() {
 
 	sn := notify.NewSlackNotifier(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
 
-	slackBot := bot.NewSlackBot(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
-	slackBot.Start(ctx)
+	// slackBot := bot.NewSlackBot(logger, config.SlackConfig.Token, config.SlackConfig.ChannelName)
+	// slackBot.Start(ctx)
 
 	s := server.NewServer(ctx, logger, config, sn)
 	s.StartServer()
