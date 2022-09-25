@@ -1,13 +1,14 @@
 package app
 
 import (
+	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/MiteshSharma/SlackBot/notify"
 	"github.com/MiteshSharma/SlackBot/pkg/model"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -15,6 +16,11 @@ import (
 
 const (
 	slackOauthURL = "https://slack.com/api/oauth.v2.access"
+)
+
+var (
+	//go:embed views/home.json
+	homeViewJson []byte
 )
 
 type slackOauthResponse struct {
@@ -94,43 +100,126 @@ func (a *App) HandleSlackMessage(eventsAPIEvent slackevents.EventsAPIEvent) erro
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
 			err = a.handleAppMentionEvent(eventsAPIEvent.TeamID, *ev)
+		case *slackevents.AppHomeOpenedEvent:
+			// Make sure that this user exists
+			// Make sure the team exists in DB
+			// Update the home page
+			blocks := &slack.Blocks{}
+			err = blocks.UnmarshalJSON(homeViewJson)
+			a.BotNotify.PublishView(ev.User, slack.HomeTabViewRequest{
+				Type:            slack.VTHomeTab,
+				Blocks:          *blocks,
+				PrivateMetadata: "",
+				CallbackID:      "ViewHomeCallbackID",
+			}, "")
 		}
 	}
 	return err
 }
 
+func (a *App) HandleSlashCommand(slashCommand slack.SlashCommand) error {
+	var err error = nil
+
+	input, err := a.CreateDialog()
+	if err != nil {
+		return err
+	}
+
+	err = a.BotNotify.SendDialog(context.Background(), input, slashCommand.TriggerID)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (a *App) ShowDialog(triggerId string) error {
+	var err error = nil
+	input, err := a.CreateDialog()
+	if err != nil {
+		return err
+	}
+
+	err = a.BotNotify.SendDialog(context.Background(), input, triggerId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (a *App) handleAppMentionEvent(workspaceID string, event slackevents.AppMentionEvent) error {
-	storageResult := a.Repository.Workspace().GetWorkspace(strings.ToLower(workspaceID))
-	if storageResult.Err != nil {
-		return fmt.Errorf(storageResult.Err.Message)
-	}
-	workspace := storageResult.Data.(*model.Workspace)
-	api := slack.New(workspace.AccessToken)
-	authResp, err := api.AuthTest()
-	if err != nil {
-		a.Log.Error(fmt.Sprint("auth request test failed with err: %w", err))
-		return fmt.Errorf("auth request test failed with err: %w", err)
-	}
-	botID := authResp.UserID
-	if !strings.HasPrefix(event.Text, "<@"+botID+">") {
-		a.Log.Debug(fmt.Sprint("Ignoring message as it doesn't contain %w prefix", botID))
-		return nil
-	}
+	// storageResult := a.Repository.Workspace().GetWorkspace(strings.ToLower(workspaceID))
+	// if storageResult.Err != nil {
+	// 	return fmt.Errorf(storageResult.Err.Message)
+	// }
+	// workspace := storageResult.Data.(*model.Workspace)
+	// api := slack.New(workspace.AccessToken)
+	// authResp, err := api.AuthTest()
+	// if err != nil {
+	// 	a.Log.Error(fmt.Sprint("auth request test failed with err: %w", err))
+	// 	return fmt.Errorf("auth request test failed with err: %w", err)
+	// }
+	// botID := authResp.UserID
+	// if !strings.HasPrefix(event.Text, "<@"+botID+">") {
+	// 	a.Log.Debug(fmt.Sprint("Ignoring message as it doesn't contain %w prefix", botID))
+	// 	return nil
+	// }
 
-	user, err := api.GetUserInfo(event.User)
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return nil
-	}
-	fmt.Println(user.RealName)
+	// user, err := api.GetUserInfo(event.User)
+	// if err != nil {
+	// 	fmt.Printf("%s\n", err)
+	// 	return nil
+	// }
+	// fmt.Println(user.RealName)
 
-	message := strings.TrimPrefix(event.Text, "<@"+botID+">")
+	// message := strings.TrimPrefix(event.Text, "<@"+botID+">")
 
-	a.BotNotify.SendEvent(a.Context, notify.Event{
-		Message:      message,
-		Channel:      "test-channel",
-		IsAttachment: false,
-	})
+	a.BotNotify.SendAttachmentMessage(context.Background(), getSlackMessage("welcome message"), "test-channel")
 
 	return nil
+}
+
+func (a *App) CreateDialog() (slack.Dialog, error) {
+	dialog := slack.Dialog{}
+	dialog.CallbackID = "test"
+	dialog.Title = "Request Title"
+	dialog.SubmitLabel = "Request"
+	dialog.NotifyOnCancel = true
+
+	// Unmarshall and append the text element
+	textElement := &slack.TextInputElement{}
+	textElement.Label = "testing label"
+	textElement.Name = "testng name"
+	textElement.Type = "text"
+	textElement.Placeholder = "Enter value"
+	textElement.Hint = "testing hint"
+
+	dialog.Elements = []slack.DialogElement{
+		textElement,
+	}
+
+	return dialog, nil
+}
+
+func getSlackMessage(message string) slack.Attachment {
+	return slack.Attachment{
+		CallbackID: "werdd",
+		Fields: []slack.AttachmentField{
+			{
+
+				Title: "Message",
+				Value: message,
+				Short: true,
+			},
+		},
+		Actions: []slack.AttachmentAction{
+			{
+				Name:  "Execute",
+				Text:  "Exec Make",
+				Type:  "button",
+				Style: "primary",
+			},
+		},
+		Footer: "Message from Bot",
+	}
 }

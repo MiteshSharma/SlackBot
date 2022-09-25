@@ -1,0 +1,27 @@
+[
+    {
+        "type": "section",
+        "text": {
+            "type": "mrkdwn",
+            "text": "*:wave: Hey [USER], Welcome to the test app。"
+        }
+},
+    {
+        "type": "actions",
+        "block_id": "home-button",
+        "elements": [
+            {
+                "type": "button",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Welcome to the test bot"
+                },
+                "style": "primary",
+                "action_id": "create_claim"
+            }
+        ]
+    },
+    {
+        "type": "divider"
+    }
+]

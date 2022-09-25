@@ -23,53 +23,34 @@ func NewSlackNotifier(log logger.Logger, token string, channel string) *SlackNot
 	}
 }
 
-// SendEvent sends event notification to slack
-func (s *SlackNotifier) SendEvent(ctx context.Context, event Event) error {
-	s.log.Debug("Sending message to slack")
-
-	targetChannel := event.Channel
-	if targetChannel == "" {
-		targetChannel = s.channel
+func (s *SlackNotifier) SendMessage(ctx context.Context, message string, targetChannel string) error {
+	_, timestamp, err := s.client.PostMessage(targetChannel, slack.MsgOptionText(message, false), slack.MsgOptionAsUser(true))
+	if err != nil {
+		return fmt.Errorf("error while posting message to channel %q with error %w at %q", targetChannel, err, timestamp)
 	}
-
-	var err error
-	if event.IsAttachment {
-		err = s.sendAttachmentMessage(ctx, event, targetChannel)
-	} else {
-		err = s.sendMessage(ctx, event, targetChannel)
-	}
-
-	return err
+	return nil
 }
 
-func (s *SlackNotifier) sendAttachmentMessage(ctx context.Context, event Event, targetChannel string) error {
-	attachment := getSlackMessage(event)
+func (s *SlackNotifier) SendAttachmentMessage(ctx context.Context, attachment slack.Attachment, targetChannel string) error {
 	_, timestamp, err := s.client.PostMessage(targetChannel, slack.MsgOptionAttachments(attachment), slack.MsgOptionAsUser(true))
 	if err != nil {
-		return fmt.Errorf("error while posting message to channel %q with error %w at %q", targetChannel, err, timestamp)
+		return fmt.Errorf("error while posting attachmenet message to channel %q with error %w at %q", targetChannel, err, timestamp)
 	}
 	return nil
 }
 
-func (s *SlackNotifier) sendMessage(ctx context.Context, event Event, targetChannel string) error {
-	_, timestamp, err := s.client.PostMessage(targetChannel, slack.MsgOptionText(event.Message, false), slack.MsgOptionAsUser(true))
+func (s *SlackNotifier) SendDialog(ctx context.Context, dialog slack.Dialog, triggerId string) error {
+	err := s.client.OpenDialogContext(ctx, triggerId, dialog)
 	if err != nil {
-		return fmt.Errorf("error while posting message to channel %q with error %w at %q", targetChannel, err, timestamp)
+		return fmt.Errorf("error while ppsting dialog to triggerId %q with error %w", triggerId, err)
 	}
 	return nil
 }
 
-// Format slack message in proper attachment format
-func getSlackMessage(event Event) slack.Attachment {
-	return slack.Attachment{
-		Fields: []slack.AttachmentField{
-			{
-
-				Title: "Message",
-				Value: event.Message,
-				Short: true,
-			},
-		},
-		Footer: "Message from Bot",
+func (s *SlackNotifier) PublishView(userID string, view slack.HomeTabViewRequest, hash string) error {
+	_, err := s.client.PublishView(userID, view, hash)
+	if err != nil {
+		return fmt.Errorf("error while publishing home view with error %w", err)
 	}
+	return err
 }
