@@ -1,0 +1,12 @@
+{
+	"callback_id": "name-46e2b0",
+	"title": "Enter your name",
+	"submit_label": "Submit",
+	"elements": [
+		{
+			"type": "text",
+			"label": "Enter your name",
+			"name": "name"
+		}
+	]
+}

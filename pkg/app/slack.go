@@ -21,6 +21,10 @@ const (
 var (
 	//go:embed views/home.json
 	homeViewJson []byte
+	//go:embed views/dialog.json
+	dialogJson []byte
+	//go:embed views/attachmentMessage.json
+	attachmentMessageJson []byte
 )
 
 type slackOauthResponse struct {
@@ -118,29 +122,21 @@ func (a *App) HandleSlackMessage(eventsAPIEvent slackevents.EventsAPIEvent) erro
 }
 
 func (a *App) HandleSlashCommand(slashCommand slack.SlashCommand) error {
-	var err error = nil
-
-	input, err := a.CreateDialog()
-	if err != nil {
-		return err
-	}
-
-	err = a.BotNotify.SendDialog(context.Background(), input, slashCommand.TriggerID)
-	if err != nil {
-		return err
-	}
+	err := a.ShowDialog(slashCommand.TriggerID)
 
 	return err
 }
 
 func (a *App) ShowDialog(triggerId string) error {
 	var err error = nil
-	input, err := a.CreateDialog()
+	dialog := slack.Dialog{}
+	err = json.Unmarshal([]byte(dialogJson), &dialog)
 	if err != nil {
+		a.Log.Error(fmt.Sprint("error when deserializing dialgo json response: %w", err))
 		return err
 	}
 
-	err = a.BotNotify.SendDialog(context.Background(), input, triggerId)
+	err = a.BotNotify.SendDialog(context.Background(), dialog, triggerId)
 	if err != nil {
 		return err
 	}
@@ -174,52 +170,15 @@ func (a *App) handleAppMentionEvent(workspaceID string, event slackevents.AppMen
 
 	// message := strings.TrimPrefix(event.Text, "<@"+botID+">")
 
-	a.BotNotify.SendAttachmentMessage(context.Background(), getSlackMessage("welcome message"), "test-channel")
+	var err error = nil
+	attachmenet := slack.Attachment{}
+	err = json.Unmarshal([]byte(attachmentMessageJson), &attachmenet)
+	if err != nil {
+		a.Log.Error(fmt.Sprint("error when deserializing attachment json response: %w", err))
+		return err
+	}
+
+	a.BotNotify.SendAttachmentMessage(context.Background(), attachmenet, "test-channel")
 
 	return nil
-}
-
-func (a *App) CreateDialog() (slack.Dialog, error) {
-	dialog := slack.Dialog{}
-	dialog.CallbackID = "test"
-	dialog.Title = "Request Title"
-	dialog.SubmitLabel = "Request"
-	dialog.NotifyOnCancel = true
-
-	// Unmarshall and append the text element
-	textElement := &slack.TextInputElement{}
-	textElement.Label = "testing label"
-	textElement.Name = "testng name"
-	textElement.Type = "text"
-	textElement.Placeholder = "Enter value"
-	textElement.Hint = "testing hint"
-
-	dialog.Elements = []slack.DialogElement{
-		textElement,
-	}
-
-	return dialog, nil
-}
-
-func getSlackMessage(message string) slack.Attachment {
-	return slack.Attachment{
-		CallbackID: "werdd",
-		Fields: []slack.AttachmentField{
-			{
-
-				Title: "Message",
-				Value: message,
-				Short: true,
-			},
-		},
-		Actions: []slack.AttachmentAction{
-			{
-				Name:  "Execute",
-				Text:  "Exec Make",
-				Type:  "button",
-				Style: "primary",
-			},
-		},
-		Footer: "Message from Bot",
-	}
 }
